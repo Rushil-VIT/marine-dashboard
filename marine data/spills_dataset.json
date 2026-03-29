@@ -1,0 +1,171 @@
+[
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [80.3300, 13.2360] },
+      "properties": {
+        "spill_id": "IND_SPILL_001",
+        "title": "Ennore Oil Spill",
+        "date": "2017-01-28",
+        "state": "Tamil Nadu",
+        "coast": "east",
+        "severity": "major",
+        "estimated_volume_tonnes": 220,
+        "cause": "collision",
+        "source_type": "tanker",
+        "status": "cleaned"
+      }
+    },
+
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [72.840, 18.929] },
+      "properties": {
+        "spill_id": "IND_SPILL_002",
+        "title": "MSC Chitra Oil Spill",
+        "date": "2010-08-19",
+        "state": "Maharashtra",
+        "coast": "west",
+        "severity": "major",
+        "estimated_volume_tonnes": 800,
+        "cause": "collision",
+        "source_type": "container vessel",
+        "status": "cleaned"
+      }
+    },
+
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [72.230, 19.650] },
+      "properties": {
+        "spill_id": "IND_SPILL_003",
+        "title": "Mumbai High Platform Fire",
+        "date": "2005-07-27",
+        "state": "Maharashtra",
+        "coast": "west",
+        "severity": "major",
+        "estimated_volume_tonnes": 400,
+        "cause": "platform fire",
+        "source_type": "offshore platform",
+        "status": "contained"
+      }
+    },
+
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [76.133, 9.312] },
+      "properties": {
+        "spill_id": "IND_SPILL_004",
+        "title": "Kochi Offshore Spill",
+        "date": "2025-05-25",
+        "state": "Kerala",
+        "coast": "west",
+        "severity": "major",
+        "estimated_volume_tonnes": 450,
+        "cause": "vessel sinking",
+        "source_type": "cargo vessel",
+        "status": "monitoring"
+      }
+    },
+
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [70.200, 22.300] },
+      "properties": {
+        "spill_id": "IND_SPILL_005",
+        "title": "Gujarat Offshore Pipeline Leak",
+        "date": "2012-06-14",
+        "state": "Gujarat",
+        "coast": "west",
+        "severity": "moderate",
+        "estimated_volume_tonnes": 120,
+        "cause": "pipeline leak",
+        "source_type": "offshore infrastructure",
+        "status": "cleaned"
+      }
+    },
+
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [86.700, 20.300] },
+      "properties": {
+        "spill_id": "IND_SPILL_006",
+        "title": "Paradip Port Fuel Leak",
+        "date": "2018-11-09",
+        "state": "Odisha",
+        "coast": "east",
+        "severity": "moderate",
+        "estimated_volume_tonnes": 60,
+        "cause": "operational discharge",
+        "source_type": "port",
+        "status": "cleaned"
+      }
+    },
+
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [73.800, 15.490] },
+      "properties": {
+        "spill_id": "IND_SPILL_007",
+        "title": "Goa Minor Tanker Grounding",
+        "date": "2016-03-17",
+        "state": "Goa",
+        "coast": "west",
+        "severity": "moderate",
+        "estimated_volume_tonnes": 40,
+        "cause": "grounding",
+        "source_type": "tanker",
+        "status": "cleaned"
+      }
+    },
+
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [83.300, 17.690] },
+      "properties": {
+        "spill_id": "IND_SPILL_008",
+        "title": "Visakhapatnam Harbor Diesel Leak",
+        "date": "2019-02-11",
+        "state": "Andhra Pradesh",
+        "coast": "east",
+        "severity": "minor",
+        "estimated_volume_tonnes": 15,
+        "cause": "fuel transfer error",
+        "source_type": "port",
+        "status": "cleaned"
+      }
+    },
+
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [88.100, 21.900] },
+      "properties": {
+        "spill_id": "IND_SPILL_009",
+        "title": "Haldia Port Bilge Discharge",
+        "date": "2021-09-03",
+        "state": "West Bengal",
+        "coast": "east",
+        "severity": "minor",
+        "estimated_volume_tonnes": 8,
+        "cause": "illegal discharge",
+        "source_type": "cargo vessel",
+        "status": "cleaned"
+      }
+    },
+
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [92.700, 11.600] },
+      "properties": {
+        "spill_id": "IND_SPILL_010",
+        "title": "Port Blair Fuel Spill",
+        "date": "2019-12-22",
+        "state": "Andaman & Nicobar",
+        "coast": "island",
+        "severity": "minor",
+        "estimated_volume_tonnes": 12,
+        "cause": "storage tank overflow",
+        "source_type": "port",
+        "status": "contained"
+      }
+    }
+]
