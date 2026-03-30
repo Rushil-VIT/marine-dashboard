@@ -496,7 +496,7 @@ function HomePage() {
           .home-premium-recovery {
             border-radius: 20px;
             padding: 16px 20px;
-            width: 45%;
+            width: 55%;
             transform: translateY(-150px) translateX(-110px);
             margin-left: auto;
             margin-right: auto;
@@ -660,7 +660,8 @@ function HomePage() {
           }
 
           .home-premium-updates {
-            width: 100%;
+            width: 90%;
+            transform: translateY(30%);
             padding: 24px;
             border-radius: 24px;
           }
