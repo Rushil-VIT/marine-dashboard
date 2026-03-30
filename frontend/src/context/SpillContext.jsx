@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 import { fetchAllSpills, fetchSpillTrends, fetchSpillStats } from "../api/spillService";
 import pollutionData from "../data/pollutions.json";
 
@@ -7,6 +14,7 @@ import pollutionData from "../data/pollutions.json";
  * Fetches data once on mount. Provides selectedSpill for map ↔ panel sync.
  */
 const SpillContext = createContext(null);
+const UPLOADED_POLLUTION_KEY = "pollution_uploaded_data";
 
 const parseDateToUtc = (value) => {
   if (!value || typeof value !== "string") return null;
@@ -36,6 +44,16 @@ export function SpillProvider({ children }) {
     type: "all",
     severity: "all",
     location: "all",
+  });
+  const [uploadedPollutions, setUploadedPollutions] = useState(() => {
+    try {
+      const stored = localStorage.getItem(UPLOADED_POLLUTION_KEY);
+      const parsed = stored ? JSON.parse(stored) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (err) {
+      console.warn("Failed to read uploaded pollution data:", err);
+      return [];
+    }
   });
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [regionFilter, setRegionFilter] = useState("all");
@@ -68,16 +86,91 @@ export function SpillProvider({ children }) {
     loadData();
   }, []);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        UPLOADED_POLLUTION_KEY,
+        JSON.stringify(uploadedPollutions)
+      );
+    } catch (err) {
+      console.warn("Failed to persist uploaded pollution data:", err);
+    }
+  }, [uploadedPollutions]);
+
   const dateRangeMs = useMemo(() => {
     const startMs = parseDateToUtc(dateRange.start);
     const endMs = parseDateToUtc(dateRange.end);
     return { startMs, endMs };
   }, [dateRange]);
 
-  const pollutionRecords = useMemo(
-    () => (Array.isArray(pollutionData) ? pollutionData : []),
-    []
-  );
+  const pollutionRecords = useMemo(() => {
+    const baseRecords = Array.isArray(pollutionData) ? pollutionData : [];
+    return [...baseRecords, ...uploadedPollutions];
+  }, [uploadedPollutions]);
+
+  const appendUploadedPollutions = useCallback((records) => {
+    if (!Array.isArray(records) || records.length === 0) {
+      return { added: 0, rejected: 0 };
+    }
+
+    const baseRecords = Array.isArray(pollutionData) ? pollutionData : [];
+    let summary = { added: 0, rejected: 0 };
+
+    setUploadedPollutions((prev) => {
+      const existingIds = new Set(
+        [...baseRecords, ...prev]
+          .map((record) => record?.id)
+          .filter(Boolean)
+      );
+      const timestamp = Date.now();
+      const validRecords = [];
+      let rejected = 0;
+
+      records.forEach((record, index) => {
+        if (!record || typeof record !== "object") {
+          rejected += 1;
+          return;
+        }
+
+        const location = record.location;
+        const type = record.type;
+        const severity = record.severity;
+        const value = record.value;
+        const hasValue =
+          value !== undefined && value !== null && String(value).trim() !== "";
+
+        if (!location || !type || !severity || !hasValue) {
+          rejected += 1;
+          return;
+        }
+
+        let id = record.id;
+        if (!id || existingIds.has(id)) {
+          id = `upload-${timestamp}-${index}`;
+        }
+
+        existingIds.add(id);
+
+        const normalizedValue = Number.isNaN(Number(value))
+          ? value
+          : Number(value);
+
+        validRecords.push({
+          ...record,
+          id,
+          location: String(location).trim(),
+          type: String(type).trim(),
+          severity: String(severity).trim().toLowerCase(),
+          value: normalizedValue,
+        });
+      });
+
+      summary = { added: validRecords.length, rejected };
+      return validRecords.length ? [...prev, ...validRecords] : prev;
+    });
+
+    return summary;
+  }, []);
 
   const filteredSpills = useMemo(() => {
     const { startMs, endMs } = dateRangeMs;
@@ -325,6 +418,7 @@ export function SpillProvider({ children }) {
     filteredStats,
     filteredTrends,
     pollutionStats,
+    appendUploadedPollutions,
     loading,
     error,
   };

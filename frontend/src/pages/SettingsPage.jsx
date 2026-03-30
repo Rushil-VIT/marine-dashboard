@@ -82,6 +82,24 @@ function SettingsPage() {
   }, [theme]);
 
   useEffect(() => {
+    const modeSwitch = document.querySelector(".mode-switch");
+    if (!modeSwitch) return undefined;
+
+    const previous = {
+      display: modeSwitch.style.display,
+      opacity: modeSwitch.style.opacity,
+    };
+
+    modeSwitch.style.display = "none";
+    modeSwitch.style.opacity = "0";
+
+    return () => {
+      modeSwitch.style.display = previous.display;
+      modeSwitch.style.opacity = previous.opacity;
+    };
+  }, []);
+
+  useEffect(() => {
     localStorage.setItem("app_sound_enabled", String(soundEnabled));
   }, [soundEnabled]);
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import PollutionFilters from "../components/PollutionFilters";
 import PollutionStatsCards from "../components/PollutionStatsCards";
 import PollutionMap from "../components/PollutionMap";
@@ -22,6 +22,24 @@ function PollutionPage() {
       [key]: value,
     }));
   };
+
+  useEffect(() => {
+    const modeSwitch = document.querySelector(".mode-switch");
+    if (!modeSwitch) return undefined;
+
+    const previous = {
+      display: modeSwitch.style.display,
+      opacity: modeSwitch.style.opacity,
+    };
+
+    modeSwitch.style.display = "none";
+    modeSwitch.style.opacity = "0";
+
+    return () => {
+      modeSwitch.style.display = previous.display;
+      modeSwitch.style.opacity = previous.opacity;
+    };
+  }, []);
 
   return (
     <div className="pollution-page">

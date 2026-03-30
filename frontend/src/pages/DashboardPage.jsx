@@ -15,8 +15,14 @@ function DashboardPage() {
   const [isRecommendationsOpen, setIsRecommendationsOpen] = useState(false);
 
   return (
-    <div style={{ padding: "0 24px 24px 24px", height: "100vh", overflowY: "auto", position: "relative" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+    <div
+      className="dashboard-page"
+      style={{ padding: "0 24px 24px 24px", height: "100vh", overflowY: "auto", position: "relative" }}
+    >
+      <div
+        className="dashboard-header"
+        style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
+      >
         <h1 className="page-title" style={{ padding: "16px 0" }}>Dashboard</h1>
         <button
           className="map-toggle-btn"

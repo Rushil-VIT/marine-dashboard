@@ -19,7 +19,7 @@ function PollutionStatsCards({ totalSites, highSeverityCount, dominantType }) {
 
       <div className="stat-card">
         <h3>Dominant Type</h3>
-        <p className="stat-value" style={{ fontSize: "18px" }}>
+        <p className="stat-value" style={{ fontSize: "clamp(14px, 2vw, 18px)" }}>
           {dominantType || "-"}
         </p>
         <p className="stat-subtitle">Most frequent source</p>

@@ -116,6 +116,25 @@ a, button {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+select {
+  color: #111;
+  background: #ffffff;
+}
+
+select:hover {
+  border-color: var(--accent);
+}
+
+select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+option {
+  color: #111;
+  background: #ffffff;
+}
+
 /* =====================================================
    APP LAYOUT (VERTICAL SIDEBAR)
 ===================================================== */
@@ -1146,3 +1165,346 @@ input[type="date"]:focus, select:focus {
   opacity: 0.5;
   font-family: monospace;
 }
+
+/* =====================================================
+   RESPONSIVE FOUNDATION
+===================================================== */
+
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.app-layout {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
+  height: 100vh;
+  overflow-x: hidden;
+}
+
+.main-content {
+  width: calc(100% - 88px);
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+.line-chart-container,
+.impact-card,
+.cleanup-dashboard,
+.weather-panel,
+.pollution-details-panel,
+.pollution-map-shell {
+  min-width: 0;
+}
+
+.cleanup-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.cleanup-table th,
+.cleanup-table td {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.page-title {
+  font-size: clamp(20px, 2.2vw, 28px);
+}
+
+.stat-card h3 {
+  font-size: clamp(10px, 1.2vw, 12px);
+}
+
+.stat-value {
+  font-size: clamp(18px, 2.4vw, 26px);
+}
+
+.stat-subtitle {
+  font-size: clamp(10px, 1.2vw, 12px);
+}
+
+.chart-title {
+  font-size: clamp(12px, 1.4vw, 14px);
+}
+
+.impact-card-title {
+  font-size: clamp(11px, 1.2vw, 13px);
+}
+
+.impact-card-value {
+  font-size: clamp(18px, 2.4vw, 22px);
+}
+
+.impact-card-description {
+  font-size: clamp(10px, 1.2vw, 12px);
+}
+
+.cleanup-title,
+.weather-title {
+  font-size: clamp(12px, 1.4vw, 14px);
+}
+
+.map-toggle-btn {
+  font-size: clamp(11px, 1.2vw, 13px);
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 72px;
+    padding: 16px 8px;
+  }
+
+  .main-content {
+    margin-left: 72px;
+    width: calc(100% - 72px);
+  }
+
+  .nav-links a {
+    width: 46px;
+    height: 46px;
+  }
+
+  .page-title {
+    padding: 14px 18px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+
+  .pollution-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pollution-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pollution-bottom {
+    grid-template-columns: 1.4fr 1fr;
+  }
+
+  .analytics-content {
+    grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+    padding: 0 18px 24px !important;
+  }
+
+  .analytics-summary-card {
+    grid-column: span 4 !important;
+  }
+
+  .analytics-chart-card,
+  .analytics-cleanup-card,
+  .analytics-weather-card {
+    grid-column: span 8 !important;
+  }
+
+  .dashboard-page {
+    padding: 0 18px 18px 18px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    position: sticky !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    transform: none !important;
+    border-radius: 0 !important;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 10px 12px;
+    border: none !important;
+    border-bottom: 1px solid var(--border) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35) !important;
+    backdrop-filter: blur(12px) saturate(130%) !important;
+  }
+
+  .logo {
+    font-size: 16px;
+    margin-bottom: 0;
+    margin-right: auto;
+  }
+
+  .nav-links {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 0;
+  }
+
+  .nav-links a {
+    width: 44px;
+    height: 44px;
+  }
+
+  .nav-links a.active::after {
+    display: none;
+  }
+
+  .mode-switch {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 0;
+  }
+
+  .mode-switch-btn {
+    font-size: 10px;
+    padding: 6px 8px;
+    min-height: 32px;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+    width: 100%;
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .stat-card {
+    padding: 14px;
+  }
+
+  .pollution-filters,
+  .pollution-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .pollution-bottom {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-charts-row {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboard-header {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .dashboard-toolbar,
+  .dashboard-toolbar-inner {
+    gap: 8px;
+  }
+
+  input[type="date"],
+  select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .analytics-content {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    padding: 0 14px 20px !important;
+  }
+
+  .analytics-summary-card,
+  .analytics-chart-card,
+  .analytics-cleanup-card,
+  .analytics-weather-card {
+    grid-column: span 4 !important;
+  }
+
+  .dashboard-page {
+    padding: 0 14px 16px 14px !important;
+    height: auto !important;
+    min-height: 100%;
+  }
+
+  .map-page-header {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .map-controls {
+    flex-wrap: wrap;
+  }
+
+  .glass-panel,
+  .line-chart-container,
+  .stat-card,
+  .cleanup-dashboard,
+  .weather-panel {
+    backdrop-filter: blur(12px) saturate(130%);
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    padding: 8px 10px;
+  }
+
+  .nav-links a {
+    width: 42px;
+    height: 42px;
+  }
+
+  .page-title {
+    padding: 12px 12px;
+  }
+
+  .stat-card {
+    padding: 12px;
+  }
+
+  .line-chart-container {
+    padding: 12px;
+  }
+
+  .pollution-page {
+    padding: 10px;
+  }
+
+  .pollution-details-panel {
+    padding: 12px;
+  }
+
+  .custom-zoom-controls {
+    bottom: 12px;
+    left: 12px;
+  }
+
+  .map-toggle-btn {
+    padding: 6px 10px;
+    min-height: 34px;
+  }
+
+  .dashboard-page {
+    padding: 0 12px 12px 12px !important;
+    height: auto !important;
+    min-height: 100%;
+  }
+}
+
