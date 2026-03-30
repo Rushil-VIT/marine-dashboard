@@ -13,7 +13,9 @@ import {
 import "leaflet/dist/leaflet.css";
 import { useSpillContext } from "../context/SpillContext";
 import SpillDetailsPanel from "../components/SpillDetailsPanel";
+import PollutionDetailsPanel from "../components/PollutionDetailsPanel";
 import SpillHeatmap from "../components/SpillHeatmap";
+import PollutionHeatmap from "../components/PollutionHeatmap";
 import RecommendationPanel from "../components/RecommendationPanel";
 import { fetchCurrents, fetchWinds } from "../api/spillService";
 import {
@@ -35,6 +37,12 @@ const SEVERITY_COLORS = {
   major: "#ff4d4d",
   moderate: "#ffa500",
   minor: "#4caf50",
+};
+
+const POLLUTION_COLORS = {
+  high: "#ff4d4d",
+  medium: "#f59e0b",
+  low: "#4ade80",
 };
 
 /* =====================================================
@@ -70,6 +78,23 @@ function FlyToSpill({ spill }) {
       });
     }
   }, [spill, map]);
+
+  return null;
+}
+
+function FlyToPollution({ pollution }) {
+  const map = useMap();
+
+  React.useEffect(() => {
+    if (!pollution?.coordinates || pollution.coordinates.length !== 2) return;
+    const [lng, lat] = pollution.coordinates;
+    const targetZoom = Math.max(map.getZoom(), 7);
+    map.flyTo([lat, lng], targetZoom, {
+      animate: true,
+      duration: 1.1,
+      easeLinearity: 0.25,
+    });
+  }, [pollution, map]);
 
   return null;
 }
@@ -160,9 +185,12 @@ const buildClusters = (spills, zoom, selectedId) => {
 
 function MapPage() {
   const {
+    dataMode,
     filteredSpills,
     selectedSpill,
     setSelectedSpill,
+    selectedPollution,
+    setSelectedPollution,
     loading,
     error,
     severityFilter,
@@ -172,9 +200,13 @@ function MapPage() {
     regionFilter,
     setRegionFilter,
     regionOptions,
+    filteredPollutions,
+    pollutionFilters,
+    setPollutionFilters,
+    pollutionOptions,
   } = useSpillContext();
 
-  const [layers, setLayers] = useState({ markers: true, heatmap: false, flow: true });
+  const [layers, setLayers] = useState({ spills: true, pollution: false, heatmap: false, flow: true });
   const [windData, setWindData] = useState([]);
   const [currentData, setCurrentData] = useState([]);
   const [mapZoom, setMapZoom] = useState(5);
@@ -206,6 +238,23 @@ function MapPage() {
     setRegionFilter(value);
   };
 
+  const updatePollutionFilter = (key, value) => {
+    setPollutionFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const handleSpillSelect = (spill) => {
+    setSelectedPollution(null);
+    setSelectedSpill(spill);
+  };
+
+  const handlePollutionSelect = (pollution) => {
+    setSelectedSpill(null);
+    setSelectedPollution(pollution);
+  };
+
   useEffect(() => {
     let mounted = true;
 
@@ -231,10 +280,27 @@ function MapPage() {
     };
   }, []);
 
+  useEffect(() => {
+    setLayers((prev) => ({
+      ...prev,
+      spills: dataMode === "spills",
+      pollution: dataMode === "pollution",
+      flow: dataMode === "spills" ? prev.flow : false,
+    }));
+  }, [dataMode]);
+
   /* ─── Filter out invalid spills ──────────────────── */
   const validSpills = useMemo(
     () => filteredSpills.filter((s) => s.geometry?.coordinates?.length === 2),
     [filteredSpills]
+  );
+
+  const validPollutions = useMemo(
+    () =>
+      filteredPollutions.filter(
+        (record) => Array.isArray(record.coordinates) && record.coordinates.length === 2
+      ),
+    [filteredPollutions]
   );
 
   const windSamples = useMemo(
@@ -336,11 +402,18 @@ function MapPage() {
       >
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <button
-            className={`map-toggle-btn ${layers.markers ? "active" : ""}`}
-            onClick={() => toggleLayer("markers")}
+            className={`map-toggle-btn ${layers.spills ? "active" : ""}`}
+            onClick={() => toggleLayer("spills")}
             style={{ borderRadius: "10px", padding: "6px 14px" }}
           >
-            📍 Markers
+            📍 Spills
+          </button>
+          <button
+            className={`map-toggle-btn ${layers.pollution ? "active" : ""}`}
+            onClick={() => toggleLayer("pollution")}
+            style={{ borderRadius: "10px", padding: "6px 14px" }}
+          >
+            Pollution
           </button>
           <button
             className={`map-toggle-btn ${layers.heatmap ? "active" : ""}`}
@@ -349,64 +422,114 @@ function MapPage() {
           >
             🔥 Heatmap
           </button>
-          <button
-            className={`map-toggle-btn ${layers.flow ? "active" : ""}`}
-            onClick={() => toggleLayer("flow")}
-            style={{ borderRadius: "10px", padding: "6px 14px" }}
-          >
-            🌊 Flow
-          </button>
+          {dataMode === "spills" && (
+            <button
+              className={`map-toggle-btn ${layers.flow ? "active" : ""}`}
+              onClick={() => toggleLayer("flow")}
+              style={{ borderRadius: "10px", padding: "6px 14px" }}
+            >
+              🌊 Flow
+            </button>
+          )}
         </div>
 
         <div style={{ width: "1px", height: "16px", background: "rgba(255,255,255,0.1)" }} />
 
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          {severityOptions.map((level) => (
-            <button
-              key={level}
-              className={`map-toggle-btn ${severityFilter?.[level] ? "active" : ""}`}
-              onClick={() => toggleSeverity(level)}
-              aria-pressed={severityFilter?.[level] ? "true" : "false"}
-              style={{ padding: "4px 10px", fontSize: "12px", borderRadius: "8px" }}
+        {dataMode === "spills" ? (
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            {severityOptions.map((level) => (
+              <button
+                key={level}
+                className={`map-toggle-btn ${severityFilter?.[level] ? "active" : ""}`}
+                onClick={() => toggleSeverity(level)}
+                aria-pressed={severityFilter?.[level] ? "true" : "false"}
+                style={{ padding: "4px 10px", fontSize: "12px", borderRadius: "8px" }}
+              >
+                {level.charAt(0).toUpperCase() + level.slice(1)}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <select
+              id="map-pollution-type"
+              value={pollutionFilters.type}
+              onChange={(event) => updatePollutionFilter("type", event.target.value)}
+              style={{ padding: "4px 8px", fontSize: "12px" }}
             >
-              {level.charAt(0).toUpperCase() + level.slice(1)}
-            </button>
-          ))}
-        </div>
+              <option value="all">All types</option>
+              {pollutionOptions.typeOptions.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+            <select
+              id="map-pollution-severity"
+              value={pollutionFilters.severity}
+              onChange={(event) => updatePollutionFilter("severity", event.target.value)}
+              style={{ padding: "4px 8px", fontSize: "12px" }}
+            >
+              <option value="all">All levels</option>
+              {pollutionOptions.severityOptions.map((severity) => (
+                <option key={severity} value={severity}>
+                  {severity}
+                </option>
+              ))}
+            </select>
+            <select
+              id="map-pollution-location"
+              value={pollutionFilters.location}
+              onChange={(event) => updatePollutionFilter("location", event.target.value)}
+              style={{ padding: "4px 8px", fontSize: "12px" }}
+            >
+              <option value="all">All locations</option>
+              {pollutionOptions.locationOptions.map((location) => (
+                <option key={location} value={location}>
+                  {location}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div style={{ width: "1px", height: "16px", background: "rgba(255,255,255,0.1)" }} />
 
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <input
-            id="map-date-start"
-            type="date"
-            value={dateRange.start}
-            max={dateRange.end || undefined}
-            onChange={(event) => updateDateRange("start", event.target.value)}
-            style={{ padding: "4px 8px", fontSize: "12px" }}
-          />
-          <span style={{ color: "#475569" }}>—</span>
-          <input
-            id="map-date-end"
-            type="date"
-            value={dateRange.end}
-            min={dateRange.start || undefined}
-            onChange={(event) => updateDateRange("end", event.target.value)}
-            style={{ padding: "4px 8px", fontSize: "12px" }}
-          />
-          <select
-            id="map-region-filter"
-            value={regionFilter}
-            onChange={(event) => updateRegionFilter(event.target.value)}
-            style={{ padding: "4px 8px", fontSize: "12px", marginLeft: "4px" }}
-          >
-            <option value="all">All States</option>
-            {regionOptions.map((region) => (
-              <option key={region} value={region}>
-                {region}
-              </option>
-            ))}
-          </select>
+          {dataMode === "spills" && (
+            <>
+              <input
+                id="map-date-start"
+                type="date"
+                value={dateRange.start}
+                max={dateRange.end || undefined}
+                onChange={(event) => updateDateRange("start", event.target.value)}
+                style={{ padding: "4px 8px", fontSize: "12px" }}
+              />
+              <span style={{ color: "#475569" }}>—</span>
+              <input
+                id="map-date-end"
+                type="date"
+                value={dateRange.end}
+                min={dateRange.start || undefined}
+                onChange={(event) => updateDateRange("end", event.target.value)}
+                style={{ padding: "4px 8px", fontSize: "12px" }}
+              />
+              <select
+                id="map-region-filter"
+                value={regionFilter}
+                onChange={(event) => updateRegionFilter(event.target.value)}
+                style={{ padding: "4px 8px", fontSize: "12px", marginLeft: "4px" }}
+              >
+                <option value="all">All States</option>
+                {regionOptions.map((region) => (
+                  <option key={region} value={region}>
+                    {region}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
           <button
             className="map-toggle-btn"
             type="button"
@@ -443,7 +566,7 @@ function MapPage() {
             <MapZoomTracker onZoomChange={setMapZoom} />
 
             {/* Selected spill spread zone */}
-            {layers.flow && selectedFlow?.spreadPolygon?.length > 0 && (
+            {layers.flow && layers.spills && selectedFlow?.spreadPolygon?.length > 0 && (
               <Polygon
                 positions={selectedFlow.spreadPolygon}
                 pathOptions={{
@@ -456,7 +579,7 @@ function MapPage() {
             )}
 
             {/* Flow Layer */}
-            {layers.flow &&
+            {layers.flow && layers.spills &&
               validSpills.map((spill) => {
                 const flow = spillFlowById.get(spill.properties?.spill_id);
                 if (!flow?.curve?.length) return null;
@@ -483,8 +606,8 @@ function MapPage() {
                 );
               })}
 
-            {/* Spill Markers — shown only in markers mode */}
-            {layers.markers &&
+            {/* Spill Markers — shown only in spills mode */}
+            {layers.spills &&
               clusteredSpills.map((cluster) => {
                 if (cluster.count > 1) {
                   return <ClusterMarker key={cluster.id} cluster={cluster} />;
@@ -509,7 +632,7 @@ function MapPage() {
                       weight={isSelected ? 4 : 1.5}
                       fillOpacity={isSelected ? 0.95 : 0.8}
                       eventHandlers={{
-                        click: () => setSelectedSpill(spill),
+                        click: () => handleSpillSelect(spill),
                       }}
                     >
                       <Tooltip direction="top" offset={[0, -10]} opacity={0.95} sticky>
@@ -533,11 +656,53 @@ function MapPage() {
                 );
               })}
 
+            {/* Pollution Markers */}
+            {layers.pollution &&
+              validPollutions.map((record) => {
+                const [lng, lat] = record.coordinates;
+                const severity = record.severity || "low";
+                const isSelected = selectedPollution?.id === record.id;
+
+                return (
+                  <CircleMarker
+                    key={record.id}
+                    center={[lat, lng]}
+                    radius={isSelected ? 14 : 9}
+                    fillColor={POLLUTION_COLORS[severity] || "#4ade80"}
+                    color={isSelected ? "#ffffff" : "rgba(255, 255, 255, 0.45)"}
+                    weight={isSelected ? 3 : 1.5}
+                    fillOpacity={isSelected ? 0.95 : 0.75}
+                    eventHandlers={{
+                      click: () => handlePollutionSelect(record),
+                    }}
+                  >
+                    <Tooltip direction="top" offset={[0, -8]} opacity={0.95} sticky>
+                      <strong>{record.location}</strong>
+                      <br />
+                      {record.type}
+                      <br />
+                      Severity: {severity}
+                    </Tooltip>
+                    <Popup>
+                      <strong>{record.location}</strong>
+                      <br />
+                      {record.type}
+                      <br />
+                      Severity: {severity}
+                    </Popup>
+                  </CircleMarker>
+                );
+              })}
+
             {/* Heatmap Layer — shown only in heatmap mode */}
-            {layers.heatmap && <SpillHeatmap spills={validSpills} />}
+            {layers.heatmap && layers.spills && <SpillHeatmap spills={validSpills} />}
+            {layers.heatmap && layers.pollution && (
+              <PollutionHeatmap pollutions={validPollutions} />
+            )}
 
             {/* Fly to selected spill */}
             {selectedSpill && <FlyToSpill spill={selectedSpill} />}
+            {selectedPollution && <FlyToPollution pollution={selectedPollution} />}
 
             {/* Custom Zoom Buttons */}
             <CustomZoomControls />
@@ -547,8 +712,11 @@ function MapPage() {
         <RecommendationPanel
           isOpen={isRecommendationsOpen}
           onClose={() => setIsRecommendationsOpen(false)}
+          dataMode={dataMode}
           selectedSpill={selectedSpill}
           allSpills={filteredSpills}
+          selectedPollution={selectedPollution}
+          allPollutions={filteredPollutions}
         />
 
         {/* ================= DETAILS PANEL ================= */}
@@ -563,10 +731,17 @@ function MapPage() {
             overflow: "auto",
           }}
         >
-          <SpillDetailsPanel
-            selectedSpill={selectedSpill}
-            onClose={() => setSelectedSpill(null)}
-          />
+          {selectedPollution ? (
+            <PollutionDetailsPanel
+              selectedPollution={selectedPollution}
+              onClose={() => setSelectedPollution(null)}
+            />
+          ) : (
+            <SpillDetailsPanel
+              selectedSpill={selectedSpill}
+              onClose={() => setSelectedSpill(null)}
+            />
+          )}
         </div>
 
       </div>

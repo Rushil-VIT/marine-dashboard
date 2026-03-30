@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
 import { fetchAllSpills, fetchSpillTrends, fetchSpillStats } from "../api/spillService";
+import pollutionData from "../data/pollutions.json";
 
 /**
  * SpillContext — Global state for spill data, stats, trends, and selection.
@@ -17,16 +18,24 @@ const parseDateToUtc = (value) => {
   return Date.UTC(year, month - 1, day);
 };
 
+const normalize = (value) => (value || "").toString().trim().toLowerCase();
+
 export function SpillProvider({ children }) {
   const [spills, setSpills] = useState([]);
   const [dataMode, setDataMode] = useState("spills");
   const [stats, setStats] = useState(null);
   const [trends, setTrends] = useState([]);
   const [selectedSpill, setSelectedSpill] = useState(null);
+  const [selectedPollution, setSelectedPollution] = useState(null);
   const [severityFilter, setSeverityFilter] = useState({
     major: true,
     moderate: true,
     minor: true,
+  });
+  const [pollutionFilters, setPollutionFilters] = useState({
+    type: "all",
+    severity: "all",
+    location: "all",
   });
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [regionFilter, setRegionFilter] = useState("all");
@@ -65,12 +74,15 @@ export function SpillProvider({ children }) {
     return { startMs, endMs };
   }, [dateRange]);
 
-  const activeSpills = dataMode === "pollution" ? [] : spills;
+  const pollutionRecords = useMemo(
+    () => (Array.isArray(pollutionData) ? pollutionData : []),
+    []
+  );
 
   const filteredSpills = useMemo(() => {
     const { startMs, endMs } = dateRangeMs;
 
-    return activeSpills.filter((spill) => {
+    return spills.filter((spill) => {
       const dateMs = parseDateToUtc(spill.properties?.date);
       if (dateMs === null) return false;
       if (startMs !== null && dateMs < startMs) return false;
@@ -84,16 +96,80 @@ export function SpillProvider({ children }) {
 
       return true;
     });
-  }, [activeSpills, dateRangeMs, severityFilter, regionFilter]);
+  }, [spills, dateRangeMs, severityFilter, regionFilter]);
 
   const regionOptions = useMemo(() => {
     const regions = new Set();
-    activeSpills.forEach((spill) => {
+    spills.forEach((spill) => {
       const region = spill.properties?.state || "Unknown";
       regions.add(region);
     });
     return Array.from(regions).sort((a, b) => a.localeCompare(b));
-  }, [activeSpills]);
+  }, [spills]);
+
+  const pollutionOptions = useMemo(() => {
+    const types = new Set();
+    const severities = new Set();
+    const locations = new Set();
+
+    pollutionRecords.forEach((record) => {
+      if (record.type) types.add(record.type);
+      if (record.severity) severities.add(record.severity);
+      if (record.location) locations.add(record.location);
+    });
+
+    return {
+      typeOptions: Array.from(types).sort((a, b) => a.localeCompare(b)),
+      severityOptions: Array.from(severities).sort((a, b) => a.localeCompare(b)),
+      locationOptions: Array.from(locations).sort((a, b) => a.localeCompare(b)),
+    };
+  }, [pollutionRecords]);
+
+  const filteredPollutions = useMemo(() => {
+    return pollutionRecords.filter((record) => {
+      const matchesType =
+        pollutionFilters.type === "all" ||
+        normalize(record.type) === normalize(pollutionFilters.type);
+      const matchesSeverity =
+        pollutionFilters.severity === "all" ||
+        normalize(record.severity) === normalize(pollutionFilters.severity);
+      const matchesLocation =
+        pollutionFilters.location === "all" ||
+        normalize(record.location) === normalize(pollutionFilters.location);
+
+      return matchesType && matchesSeverity && matchesLocation;
+    });
+  }, [pollutionRecords, pollutionFilters]);
+
+  const pollutionStats = useMemo(() => {
+    const typeCounts = new Map();
+    let highSeverityCount = 0;
+
+    filteredPollutions.forEach((record) => {
+      const severity = normalize(record.severity);
+      if (severity === "high") highSeverityCount += 1;
+
+      const type = record.type || "Unknown";
+      const current = typeCounts.get(type) || 0;
+      typeCounts.set(type, current + 1);
+    });
+
+    let dominantType = "-";
+    let dominantCount = 0;
+
+    typeCounts.forEach((count, type) => {
+      if (count > dominantCount) {
+        dominantCount = count;
+        dominantType = type;
+      }
+    });
+
+    return {
+      totalSites: filteredPollutions.length,
+      highSeverityCount,
+      dominantType,
+    };
+  }, [filteredPollutions]);
 
   const filteredStats = useMemo(() => {
     const overview = {
@@ -204,6 +280,26 @@ export function SpillProvider({ children }) {
     }
   }, [filteredSpills, selectedSpill, setSelectedSpill]);
 
+  useEffect(() => {
+    if (!selectedPollution) return;
+
+    const stillVisible = filteredPollutions.some(
+      (record) => record.id === selectedPollution.id
+    );
+
+    if (!stillVisible) {
+      setSelectedPollution(null);
+    }
+  }, [filteredPollutions, selectedPollution]);
+
+  useEffect(() => {
+    if (dataMode === "pollution") {
+      setSelectedSpill(null);
+    } else {
+      setSelectedPollution(null);
+    }
+  }, [dataMode]);
+
   const value = {
     spills,
     dataMode,
@@ -212,16 +308,23 @@ export function SpillProvider({ children }) {
     trends,
     selectedSpill,
     setSelectedSpill,
+    selectedPollution,
+    setSelectedPollution,
     severityFilter,
     setSeverityFilter,
+    pollutionFilters,
+    setPollutionFilters,
     dateRange,
     setDateRange,
     regionFilter,
     setRegionFilter,
     regionOptions,
+    pollutionOptions,
     filteredSpills,
+    filteredPollutions,
     filteredStats,
     filteredTrends,
+    pollutionStats,
     loading,
     error,
   };

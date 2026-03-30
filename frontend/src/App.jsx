@@ -7,10 +7,12 @@ import {
   FaChartBar,
   FaLightbulb,
   FaCog,
+  FaExclamationTriangle,
 } from "react-icons/fa";
 import HomePage from "./pages/HomePage";
 import DashboardPage from "./pages/DashboardPage";
 import MapPage from "./pages/MapPage";
+import PollutionPage from "./pages/PollutionPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import RecommendationsPage from "./pages/RecommendationsPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -42,6 +44,9 @@ function App() {
               <NavLink to="/map" aria-label="Map" title="Map">
                 <FaMapMarkedAlt />
               </NavLink>
+              <NavLink to="/pollution" aria-label="Pollution" title="Pollution">
+                <FaExclamationTriangle />
+              </NavLink>
               <NavLink to="/analysis" aria-label="Analysis" title="Analysis">
                 <FaChartBar />
               </NavLink>
@@ -60,6 +65,7 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/map" element={<MapPage />} />
+              <Route path="/pollution" element={<PollutionPage />} />
               <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="/analysis" element={<AnalyticsPage />} />
               <Route path="/recommendations" element={<RecommendationsPage />} />

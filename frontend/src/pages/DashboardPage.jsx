@@ -5,7 +5,13 @@ import LayoutGrid from "../components/LayoutGrid";
 import RecommendationPanel from "../components/RecommendationPanel";
 
 function DashboardPage() {
-  const { selectedSpill, filteredSpills } = useSpillContext();
+  const {
+    dataMode,
+    selectedSpill,
+    filteredSpills,
+    selectedPollution,
+    filteredPollutions,
+  } = useSpillContext();
   const [isRecommendationsOpen, setIsRecommendationsOpen] = useState(false);
 
   return (
@@ -28,9 +34,12 @@ function DashboardPage() {
       <RecommendationPanel
         isOpen={isRecommendationsOpen}
         onClose={() => setIsRecommendationsOpen(false)}
+        dataMode={dataMode}
         selectedSpill={selectedSpill}
         allSpills={filteredSpills}
-        title="Recommendations"
+        selectedPollution={selectedPollution}
+        allPollutions={filteredPollutions}
+        title={dataMode === "pollution" ? "Pollution Recommendations" : "Recommendations"}
       />
     </div>
   );

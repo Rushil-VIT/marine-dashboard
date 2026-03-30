@@ -1,24 +1,35 @@
 import React, { useMemo } from "react";
 import { useSpillContext } from "../context/SpillContext";
-import { generateInsights } from "../utils/insightsEngine";
+import { generateInsightsByMode } from "../utils/insightsEngine";
 
 function InsightsPanel() {
-  const { filteredSpills, filteredStats, filteredTrends, loading } = useSpillContext();
+  const {
+    dataMode,
+    filteredSpills,
+    filteredStats,
+    filteredTrends,
+    filteredPollutions,
+    loading,
+  } = useSpillContext();
+
+  const isLoading = dataMode === "spills" ? loading : false;
 
   const insights = useMemo(
     () =>
-      generateInsights({
+      generateInsightsByMode({
+        dataMode,
         spills: filteredSpills,
         stats: filteredStats,
         trends: filteredTrends,
+        pollutions: filteredPollutions,
       }),
-    [filteredSpills, filteredStats, filteredTrends]
+    [dataMode, filteredSpills, filteredStats, filteredTrends, filteredPollutions]
   );
 
   return (
     <div className="line-chart-container">
       <h3 className="chart-title">Decision Insights</h3>
-      {loading ? (
+      {isLoading ? (
         <p style={{ fontSize: "13px", opacity: 0.8 }}>Loading insights...</p>
       ) : (
         <ul style={{ marginTop: "10px", paddingLeft: "18px", lineHeight: 1.6 }}>

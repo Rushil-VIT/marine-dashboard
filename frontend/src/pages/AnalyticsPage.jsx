@@ -3,9 +3,13 @@ import EnvironmentalImpact from "../components/EnvironmentalImpact";
 import CleanupDashboard from "../components/CleanupDashboard";
 import WeatherPanel from "../components/WeatherPanel";
 import LayoutGrid from "../components/LayoutGrid";
+import PollutionAnalyticsPanels from "../components/PollutionAnalyticsPanels";
+import { useSpillContext } from "../context/SpillContext";
 
 /* Main analytics page component */
 function AnalyticsPage() {
+  const { dataMode } = useSpillContext();
+
   return (
     <div className="analytics-page" style={{ padding: "12px 16px 16px" }}>
       {/* Page title */}
@@ -14,20 +18,26 @@ function AnalyticsPage() {
       {/* Content wrapper required by CSS */}
       <div className="analytics-content" style={{ padding: 0, marginTop: "12px" }}>
         <LayoutGrid minColumnWidth={320} gap="16px">
-          {/* Environmental Impact Section */}
-          <div className="analytics-section">
-            <EnvironmentalImpact />
-          </div>
+          {dataMode === "pollution" ? (
+            <PollutionAnalyticsPanels />
+          ) : (
+            <>
+              {/* Environmental Impact Section */}
+              <div className="analytics-section">
+                <EnvironmentalImpact />
+              </div>
 
-          {/* Cleanup Section */}
-          <div className="analytics-section">
-            <CleanupDashboard />
-          </div>
+              {/* Cleanup Section */}
+              <div className="analytics-section">
+                <CleanupDashboard />
+              </div>
 
-          {/* Weather Section */}
-          <div className="analytics-section">
-            <WeatherPanel />
-          </div>
+              {/* Weather Section */}
+              <div className="analytics-section">
+                <WeatherPanel />
+              </div>
+            </>
+          )}
         </LayoutGrid>
       </div>
     </div>

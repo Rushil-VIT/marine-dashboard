@@ -28,6 +28,62 @@ const RULES = {
   },
 };
 
+const normalizeValue = (value) => String(value || "").trim().toLowerCase();
+
+const POLLUTION_RULES = [
+  {
+    id: "highSeverity",
+    severityLevel: "high",
+    matches: (record) => normalizeValue(record?.severity) === "high",
+    title: (record) => {
+      const location = record?.location || "selected site";
+      return `Urgent intervention: ${location}`;
+    },
+    description: (record) => {
+      const location = record?.location || "this site";
+      return `High-severity pollution requires urgent intervention at ${location}.`;
+    },
+    action: (record) => {
+      const location = record?.location || "this site";
+      return `Prioritize immediate containment and rapid cleanup crews at ${location}.`;
+    },
+  },
+  {
+    id: "oilType",
+    severityLevel: "high",
+    matches: (record) => normalizeValue(record?.type).includes("oil"),
+    title: (record) => {
+      const location = record?.location || "the site";
+      return `Oil containment priority for ${location}`;
+    },
+    description: (record) => {
+      const type = record?.type || "oil";
+      return `Oil pollution detected (${type}).`;
+    },
+    action: (record) => {
+      const location = record?.location || "the site";
+      return `Containment and cleanup priority: deploy booms and skimmers at ${location}.`;
+    },
+  },
+  {
+    id: "plasticType",
+    severityLevel: "medium",
+    matches: (record) => normalizeValue(record?.type).includes("plastic"),
+    title: (record) => {
+      const location = record?.location || "the site";
+      return `Plastic waste response for ${location}`;
+    },
+    description: (record) => {
+      const type = record?.type || "plastic";
+      return `Plastic pollution detected (${type}).`;
+    },
+    action: (record) => {
+      const location = record?.location || "the site";
+      return `Increase waste management and public awareness efforts around ${location}.`;
+    },
+  },
+];
+
 const normalizeCoast = (coast) => String(coast || "").trim().toLowerCase();
 
 const buildRecommendation = ({ title, severityLevel, description, action }) => ({
@@ -77,6 +133,19 @@ const generateSpillRecommendations = (spill) => {
   }
 
   return recommendations;
+};
+
+const generatePollutionRecommendations = (record) => {
+  if (!record) return [];
+
+  return POLLUTION_RULES.filter((rule) => rule.matches(record)).map((rule) =>
+    buildRecommendation({
+      title: rule.title(record),
+      severityLevel: rule.severityLevel,
+      description: rule.description(record),
+      action: rule.action(record),
+    })
+  );
 };
 
 const summarizeCoastImpact = (spills) => {
@@ -170,7 +239,110 @@ const generateGeneralRecommendations = (spills) => {
   return recommendations;
 };
 
-export const generateRecommendations = ({ selectedSpill, allSpills }) => {
+const summarizePollutionTypes = (pollutions) => {
+  const typeCounts = new Map();
+
+  pollutions.forEach((record) => {
+    const type = record?.type || "Unknown";
+    typeCounts.set(type, (typeCounts.get(type) || 0) + 1);
+  });
+
+  let topType = null;
+  let topCount = 0;
+  typeCounts.forEach((count, type) => {
+    if (count > topCount) {
+      topCount = count;
+      topType = type;
+    }
+  });
+
+  if (!topType) return null;
+
+  return buildRecommendation({
+    title: "Dominant pollution source",
+    severityLevel: "medium",
+    description: `${topType} appears most frequently (${topCount} sites).`,
+    action: `Target containment and cleanup plans toward ${topType} sources first.`,
+  });
+};
+
+const summarizePollutionSeverity = (pollutions) => {
+  const counts = { high: 0, medium: 0, low: 0 };
+
+  pollutions.forEach((record) => {
+    const severity = normalizeValue(record?.severity);
+    if (counts[severity] !== undefined) counts[severity] += 1;
+  });
+
+  const action = counts.high > 0
+    ? `Dispatch urgent intervention to ${counts.high} high-severity sites first.`
+    : `Focus cleanup planning across ${counts.medium + counts.low} medium/low severity sites.`;
+
+  return buildRecommendation({
+    title: "Severity mix",
+    severityLevel: counts.high > 0 ? "high" : "medium",
+    description: `High: ${counts.high}, Medium: ${counts.medium}, Low: ${counts.low}.`,
+    action,
+  });
+};
+
+const summarizePollutionHotspots = (pollutions) => {
+  const locationCounts = new Map();
+
+  pollutions.forEach((record) => {
+    const location = record?.location || "Unknown";
+    locationCounts.set(location, (locationCounts.get(location) || 0) + 1);
+  });
+
+  let topLocation = null;
+  let topCount = 0;
+  locationCounts.forEach((count, location) => {
+    if (count > topCount) {
+      topCount = count;
+      topLocation = location;
+    }
+  });
+
+  if (!topLocation) return null;
+
+  return buildRecommendation({
+    title: "Priority hotspot",
+    severityLevel: "medium",
+    description: `${topLocation} has ${topCount} tracked pollution sites.`,
+    action: `Prioritize inspections and cleanup resources near ${topLocation}.`,
+  });
+};
+
+const generateGeneralPollutionRecommendations = (pollutions) => {
+  if (!Array.isArray(pollutions) || pollutions.length === 0) return [];
+
+  const recommendations = [];
+  const hotspot = summarizePollutionHotspots(pollutions);
+  if (hotspot) recommendations.push(hotspot);
+
+  const typeSummary = summarizePollutionTypes(pollutions);
+  if (typeSummary) recommendations.push(typeSummary);
+
+  recommendations.push(summarizePollutionSeverity(pollutions));
+
+  return recommendations;
+};
+
+export const generateRecommendations = ({
+  dataMode = "spills",
+  selectedSpill,
+  allSpills,
+  selectedPollution,
+  allPollutions,
+}) => {
+  if (dataMode === "pollution") {
+    if (selectedPollution) {
+      return generatePollutionRecommendations(selectedPollution);
+    }
+
+    return generateGeneralPollutionRecommendations(allPollutions);
+  }
+
   if (selectedSpill) {
     return generateSpillRecommendations(selectedSpill);
   }

@@ -240,3 +240,109 @@ export const generateInsights = ({ spills, stats, trends }) => {
 
   return insights;
 };
+
+const summarizePollutionTypes = (pollutions) => {
+  const typeCounts = new Map();
+
+  pollutions.forEach((record) => {
+    const type = record.type || "Unknown";
+    typeCounts.set(type, (typeCounts.get(type) || 0) + 1);
+  });
+
+  let topType = null;
+  let topCount = 0;
+  typeCounts.forEach((count, type) => {
+    if (count > topCount) {
+      topCount = count;
+      topType = type;
+    }
+  });
+
+  if (!topType) return null;
+
+  return {
+    id: "pollution-type",
+    title: "Dominant source",
+    description: `${topType} is the most frequent pollution source (${topCount} sites).`,
+  };
+};
+
+const summarizePollutionSeverity = (pollutions) => {
+  const counts = { high: 0, medium: 0, low: 0 };
+
+  pollutions.forEach((record) => {
+    const severity = String(record.severity || "").toLowerCase();
+    if (counts[severity] !== undefined) counts[severity] += 1;
+  });
+
+  const description = `High: ${counts.high}, Medium: ${counts.medium}, Low: ${counts.low}.`;
+
+  return {
+    id: "pollution-severity",
+    title: "Severity distribution",
+    description,
+  };
+};
+
+const summarizePollutionHotspots = (pollutions) => {
+  const locationCounts = new Map();
+
+  pollutions.forEach((record) => {
+    const location = record.location || "Unknown";
+    locationCounts.set(location, (locationCounts.get(location) || 0) + 1);
+  });
+
+  let topLocation = null;
+  let topCount = 0;
+  locationCounts.forEach((count, location) => {
+    if (count > topCount) {
+      topCount = count;
+      topLocation = location;
+    }
+  });
+
+  if (!topLocation) return null;
+
+  return {
+    id: "pollution-hotspot",
+    title: "Hotspot location",
+    description: `${topLocation} accounts for ${topCount} tracked pollution sites.`,
+  };
+};
+
+const generatePollutionInsights = ({ pollutions }) => {
+  if (!Array.isArray(pollutions) || pollutions.length === 0) {
+    return [
+      {
+        id: "no-data",
+        title: "No active insights",
+        description: "Adjust filters to include pollution sites and generate insights.",
+      },
+    ];
+  }
+
+  const insights = [];
+  const typeInsight = summarizePollutionTypes(pollutions);
+  if (typeInsight) insights.push(typeInsight);
+
+  insights.push(summarizePollutionSeverity(pollutions));
+
+  const hotspotInsight = summarizePollutionHotspots(pollutions);
+  if (hotspotInsight) insights.push(hotspotInsight);
+
+  return insights;
+};
+
+export const generateInsightsByMode = ({
+  dataMode,
+  spills,
+  stats,
+  trends,
+  pollutions,
+}) => {
+  if (dataMode === "pollution") {
+    return generatePollutionInsights({ pollutions });
+  }
+
+  return generateInsights({ spills, stats, trends });
+};

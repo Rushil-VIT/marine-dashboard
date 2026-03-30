@@ -12,6 +12,8 @@ import {
   Cell,
 } from "recharts";
 import { useSpillContext } from "../context/SpillContext";
+import PollutionFilters from "./PollutionFilters";
+import PollutionStatsCards from "./PollutionStatsCards";
 
 /* Month names for chart labels */
 const MONTH_NAMES = [
@@ -29,6 +31,7 @@ const SEVERITY_COLORS = {
 /* Dashboard overview component — now data-driven */
 function DashboardOverview() {
   const {
+    dataMode,
     filteredStats,
     filteredTrends,
     loading,
@@ -40,6 +43,10 @@ function DashboardOverview() {
     regionFilter,
     setRegionFilter,
     regionOptions,
+    pollutionFilters,
+    setPollutionFilters,
+    pollutionOptions,
+    pollutionStats,
   } = useSpillContext();
 
   const updateDateRange = (key, value) => {
@@ -55,6 +62,49 @@ function DashboardOverview() {
       [level]: !prev[level],
     }));
   };
+
+  const handlePollutionFilterChange = (key, value) => {
+    setPollutionFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  if (dataMode === "pollution") {
+    return (
+      <div className="dashboard-overview">
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "12px",
+            paddingBottom: "8px",
+            borderBottom: "1px solid rgba(255, 255, 255, 0.03)",
+          }}
+        >
+          <div style={{ marginRight: "auto" }}>
+            <h2 style={{ fontSize: "16px", fontWeight: 700, color: "#f8fafc" }}>
+              Pollution Overview
+            </h2>
+          </div>
+        </div>
+
+        <PollutionFilters
+          filters={pollutionFilters}
+          options={pollutionOptions}
+          onFilterChange={handlePollutionFilterChange}
+        />
+
+        <PollutionStatsCards
+          totalSites={pollutionStats.totalSites}
+          highSeverityCount={pollutionStats.highSeverityCount}
+          dominantType={pollutionStats.dominantType}
+        />
+      </div>
+    );
+  }
 
   /* ─── Loading / Error ────────────────────────────── */
   if (loading) {

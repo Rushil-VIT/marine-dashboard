@@ -590,6 +590,216 @@ input[type="date"]:focus, select:focus {
 }
 
 /* =====================================================
+   POLLUTION DASHBOARD
+===================================================== */
+
+.pollution-page {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 14px;
+  padding: 16px 20px 20px;
+  overflow: hidden;
+}
+
+.pollution-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  background: var(--panel-strong);
+  border: 1px solid var(--border);
+  padding: 12px;
+  border-radius: 16px;
+}
+
+.filter-field {
+  display: grid;
+  gap: 6px;
+}
+
+.filter-field label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.pollution-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.pollution-stats .stat-card {
+  min-height: 92px;
+}
+
+.pollution-bottom {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 14px;
+  min-height: 0;
+}
+
+.pollution-map-shell {
+  position: relative;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  background: rgba(2, 6, 23, 0.45);
+}
+
+.pollution-map-shell .map-container {
+  border-radius: 18px;
+}
+
+.pollution-details-panel {
+  background: var(--panel-strong);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.pollution-details-panel h4 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.pollution-section {
+  display: grid;
+  gap: 6px;
+}
+
+.pollution-pill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pollution-pill {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pollution-pill.is-muted {
+  color: var(--muted);
+}
+
+.pollution-legend {
+  display: grid;
+  gap: 10px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.legend-dot.high {
+  background: #ff4d4d;
+  box-shadow: 0 0 8px rgba(255, 77, 77, 0.6);
+}
+
+.legend-dot.medium {
+  background: #f59e0b;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.45);
+}
+
+.legend-dot.low {
+  background: #4ade80;
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.45);
+}
+
+.severity-high {
+  background: rgba(255, 77, 77, 0.25);
+  color: #ff4d4d;
+  border: 1px solid rgba(255, 77, 77, 0.4);
+}
+
+.severity-medium {
+  background: rgba(245, 158, 11, 0.25);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.severity-low {
+  background: rgba(74, 222, 128, 0.25);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.4);
+}
+
+.effectiveness-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.effectiveness-low {
+  color: #f97316;
+  background: rgba(249, 115, 22, 0.2);
+  border: 1px solid rgba(249, 115, 22, 0.35);
+}
+
+.effectiveness-medium {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.2);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+.effectiveness-high {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.2);
+  border: 1px solid rgba(74, 222, 128, 0.35);
+}
+
+@media (max-width: 900px) {
+  .pollution-page {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .pollution-filters {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .pollution-stats {
+    gap: 8px;
+  }
+
+  .pollution-stats .stat-value {
+    font-size: 18px;
+  }
+
+  .pollution-bottom {
+    gap: 10px;
+    grid-template-columns: 1.2fr 1fr;
+  }
+}
+
+/* =====================================================
    HOME HERO
 ===================================================== */
 

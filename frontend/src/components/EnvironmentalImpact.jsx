@@ -3,9 +3,58 @@ import { useSpillContext } from "../context/SpillContext";
 
 /* Environmental impact metrics component — Data driven */
 function EnvironmentalImpact() {
-  const { filteredStats, loading } = useSpillContext();
+  const {
+    dataMode,
+    filteredStats,
+    filteredPollutions,
+    pollutionStats,
+    loading,
+  } = useSpillContext();
+
+  const isLoading = dataMode === "spills" ? loading : false;
 
   const impactData = useMemo(() => {
+    if (dataMode === "pollution") {
+      const totalSites = pollutionStats?.totalSites || 0;
+      const highSeverityCount = pollutionStats?.highSeverityCount || 0;
+      const dominantType = pollutionStats?.dominantType || "-";
+
+      const locationCounts = new Map();
+      filteredPollutions.forEach((record) => {
+        const location = record.location || "Unknown";
+        locationCounts.set(location, (locationCounts.get(location) || 0) + 1);
+      });
+
+      let topLocation = "-";
+      let topCount = 0;
+      locationCounts.forEach((count, location) => {
+        if (count > topCount) {
+          topCount = count;
+          topLocation = location;
+        }
+      });
+
+      return [
+        {
+          title: "High Severity Sites",
+          value: highSeverityCount.toString(),
+          description: "Sites requiring immediate response",
+        },
+        {
+          title: "Total Tracked Sites",
+          value: totalSites.toString(),
+          description: "Active pollution locations",
+        },
+        {
+          title: "Dominant Source",
+          value: dominantType,
+          description: topLocation !== "-"
+            ? `Most frequent location: ${topLocation}`
+            : "Most frequent pollution type",
+        },
+      ];
+    }
+
     if (!filteredStats) return [];
 
     const totalVolume = filteredStats.overview?.totalVolume || 0;
@@ -30,12 +79,12 @@ function EnvironmentalImpact() {
         description: "Number of spills on East vs West coast",
       },
     ];
-  }, [filteredStats]);
+  }, [dataMode, filteredStats, filteredPollutions, pollutionStats]);
 
   return (
     <div className="environmental-impact">
       <h2 className="impact-title">
-        Environmental Impact {loading && <span style={{fontSize:'0.6em', opacity: 0.7}}>(Loading...)</span>}
+        Environmental Impact {isLoading && <span style={{fontSize:'0.6em', opacity: 0.7}}>(Loading...)</span>}
       </h2>
 
       <div className="impact-cards-container">

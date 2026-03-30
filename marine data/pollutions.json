@@ -1,0 +1,38 @@
+[
+  {
+    "id": "CHN_POLL_001",
+    "location": "Ennore Creek",
+    "coordinates": [80.3203, 13.2567],
+    "type": "oil + industrial",
+    "severity": "high",
+    "causes": ["oil spill", "thermal plant discharge", "industrial waste"],
+    "impact": ["marine life damage", "fisher livelihood loss"],
+    "methods_tried": ["containment booms", "manual cleanup"],
+    "solutions": ["strict industrial regulation", "real-time monitoring"],
+    "effectiveness": "low"
+  },
+  {
+    "id": "CHN_POLL_002",
+    "location": "Marina Beach",
+    "coordinates": [80.2824, 13.0500],
+    "type": "plastic + sewage",
+    "severity": "medium",
+    "causes": ["tourism waste", "urban drainage"],
+    "impact": ["microplastics", "water contamination"],
+    "methods_tried": ["manual cleaning drives"],
+    "solutions": ["waste segregation", "public awareness"],
+    "effectiveness": "moderate"
+  },
+  {
+    "id": "CHN_POLL_003",
+    "location": "Kasimedu Harbor",
+    "coordinates": [80.2989, 13.1231],
+    "type": "oil + organic waste",
+    "severity": "high",
+    "causes": ["fishing waste", "boat oil leakage"],
+    "impact": ["water toxicity", "odor", "marine decline"],
+    "methods_tried": ["localized cleanup"],
+    "solutions": ["harbor waste systems", "oil disposal control"],
+    "effectiveness": "low"
+  }
+]
